@@ -11,6 +11,7 @@
 class VRAVoltage
 {
 public:
+    
     enum Characteristics {
         TTE,
         TTF,
@@ -27,9 +28,16 @@ public:
 
     VRAVoltage(Serial *_pc, PinName p_sda, PinName p_scl, PinName p_interrupt);
 
-    GattCharacteristic** getCharacteristics(GattCharacteristic** c);
+    const UUID *gattServiceUUID;
+    GattService *gattService;
+    GattCharacteristic **gattCharacteristics;
+
+    void addCustomGattService();
+
+    void initCharacteristics();
+
+    void getCharacteristics();
     uint8_t getCharacteristcsCount();
-    uint8_t *values;
 
     BLEChar **characs;
 
