@@ -134,6 +134,14 @@ int VRAVoltage::get_charge() {
   return max17055ToPerc(readMax17055(MAX17055::REP_SOC));
 }
 
+int VRAVoltage::get_current_value(){
+  return max17055TouA(readMax17055(MAX17055::CURRENT));
+}
+
+int VRAVoltage::get_average_current_value(){
+  return max17055TouA(readMax17055(MAX17055::AVG_CURRENT));
+}
+
 void VRAVoltage::get_tte() {
   this->characs[TTE]->setIntVal(max17055ToMinutes(readMax17055(MAX17055::TTE)));
 }

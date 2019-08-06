@@ -48,6 +48,8 @@ public:
     BQ25896 *voltageCtl;
     MAX17055 *batteryChk;
     int get_charge();
+    int get_average_current_value();
+    int get_current_value();
 
     void get_tte(void);
     void get_ttf(void);
@@ -82,7 +84,7 @@ public:
 
     I2C *i2c;
     DigitalOut *select;
-    InterruptIn *interruptPin;
+    InterruptIn *voltageInt;
 
     void init_voltageCtl();
     void init_batteryChk();
