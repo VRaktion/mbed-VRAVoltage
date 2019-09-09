@@ -2,12 +2,11 @@
 
 const uint16_t BATTERY_OTG_CHARACTERISTIC = 0xff0f;
 
-VRAVoltage::VRAVoltage(Serial *_pc, PinName p_sda, PinName p_scl,
+VRAVoltage::VRAVoltage(PinName p_sda, PinName p_scl,
                        PinName p_interrupt) {
 
   this->chargeState = 0;
-  this->pc = _pc;
-  this->pc->printf("generate voltage module\n\r");
+  printf("generate voltage module\n\r");
   i2c = new I2C(p_sda, p_scl);
 
   batteryChk = new MAX17055(*i2c);
@@ -29,7 +28,7 @@ void VRAVoltage::init() {
 }
 
 void VRAVoltage::initCharacteristics() {
-  this->pc->printf("voltage uuid f03de978-d217-478c-a106-8e1b65165461\n\r");
+  printf("voltage uuid f03de978-d217-478c-a106-8e1b65165461\n\r");
   this->gattServiceUUID = new UUID("f03de978-d217-478c-a106-8e1b65165461");
 
   this->characs = (BLEChar **)malloc(COUNT * sizeof(BLEChar *));
@@ -64,9 +63,9 @@ void VRAVoltage::initCharacteristics() {
   this->characs[FULL_CAPACITY]->readCb->attach(this,
                                                &VRAVoltage::get_full_capacity);
 
-  this->characs[V_CELL] =
-      new BLEChar(0xff08, GattCharacteristic::BLE_GATT_CHAR_PROPERTIES_READ, 4);
-  this->characs[V_CELL]->readCb->attach(this, &VRAVoltage::get_v_cell);
+  // this->characs[V_CELL] =
+  //     new BLEChar(0xff08, GattCharacteristic::BLE_GATT_CHAR_PROPERTIES_READ, 4);
+  // this->characs[V_CELL]->readCb->attach(this, &VRAVoltage::get_v_cell);
 
   this->characs[OTG] =
       new BLEChar(0xff0f,
@@ -100,24 +99,24 @@ volatile bool voltInt = false;
 void VRAVoltage::voltageIntISR(void) { voltInt = true; }
 
 void VRAVoltage::init_voltageCtl() {
-  pc->printf("init voltageCtl\n\r");
+  printf("init voltageCtl\n\r");
   voltageCtl->reset();
   voltageCtl->disableWATCHDOG(); // disable Watchdog
   voltageCtl->disableILIMPin();
   voltageCtl->setIINLIM(3250); // mA
   voltageCtl->enableOTG();
-  voltageCtl->setBOOSTV(5000); //
+  voltageCtl->setBOOSTV(4900);//5000); //
   voltageCtl->setICHG(1280);   // Fast Charge Current Limit 1280
   voltageCtl->setBOOST_LIM(6); // BOOST_LIM 2.15A
   // voltageCtl->enableFORCE_VINDPM();//absolute VINDPM
   // voltageCtl->setVINDPM(4000);
-  // pc->printf("VINDPM: %d\n\r", voltageCtl->getVINDPM());
+  // printf("VINDPM: %d\n\r", voltageCtl->getVINDPM());
 
   this->characs[OTG]->value[0] = 0x01; // OTG enabled
 }
 
 void VRAVoltage::init_batteryChk() {
-  pc->printf("init batteryChk\n\r");
+  printf("init batteryChk\n\r");
   batteryChk->init(0);
   batteryChk->writeReg(MAX17055::DESIGN_CAP,
                        (uint16_t)0x0A28); // nominal capacity in mAh * 2
@@ -175,16 +174,16 @@ void VRAVoltage::get_full_capacity() {
 }
 
 void VRAVoltage::get_v_cell() {
-  this->characs[V_CELL]->setIntVal(
-      max17055TomV(readMax17055(MAX17055::V_CELL)));
+  // this->characs[V_CELL]->setIntVal(
+  //     max17055TomV(readMax17055(MAX17055::V_CELL)));
 }
 
 void VRAVoltage::get_otg() {
-  // this->characs[OTG]->value[0] = 0x23;
+  this->characs[OTG]->value[0] = 0x23;
 }
 
 void VRAVoltage::set_otg() {
-  // this->pc->printf("OTG: %x\n\r", this->characs[OTG]->value[0]);
+  // printf("OTG: %x\n\r", this->characs[OTG]->value[0]);
   if (this->characs[OTG]->value[0]) {
     voltageCtl->enableOTG();
   } else {
@@ -196,14 +195,14 @@ void VRAVoltage::checkChargingState(void) {
   voltageCtl->oneShotADC();
   if (chargeState == 0) {
     if (voltageCtl->getVBUSV() >= 4.99) {
-      pc->printf("charger detected\n\r");
+      printf("charger detected\n\r");
       chargeState = 1;
       // if(*chargerDetectedCb) (*chargerDetectedCb)();
       // voltageCtl->disableOTG();
     }
   } else if (chargeState == 1) {
     if (voltageCtl->getVBUSV() < 4.99) {
-      pc->printf("charger removed\n\r");
+      printf("charger removed\n\r");
       chargeState = 0;
       // if(chargerRemovedCb) (*chargerRemovedCb)();
       // init_voltageCtl();

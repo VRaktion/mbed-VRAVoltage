@@ -20,13 +20,13 @@ public:
         AV_CURRENT,
         CAPACITY,
         FULL_CAPACITY,
-        V_CELL,
+        // V_CELL,
         OTG,
 
         COUNT
     };
 
-    VRAVoltage(Serial *_pc, PinName p_sda, PinName p_scl, PinName p_interrupt);
+    VRAVoltage(PinName p_sda, PinName p_scl, PinName p_interrupt);
 
     const UUID *gattServiceUUID;
     GattService *gattService;
@@ -80,7 +80,6 @@ public:
 
     uint8_t chargeState;
     volatile bool voltInt;
-    Serial *pc;
 
     I2C *i2c;
     DigitalOut *select;
