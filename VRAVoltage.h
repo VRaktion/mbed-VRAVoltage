@@ -6,9 +6,10 @@
 #include "ble/Gap.h"
 #include "BQ25896.h"
 #include "MAX17055.h"
-#include "BLEChar.h"
+#include "BLEService.h"
+// #include "BLEChar.h"
 
-class VRAVoltage
+class VRAVoltage: public BLEService
 {
 public:
     
@@ -20,26 +21,15 @@ public:
         AV_CURRENT,
         CAPACITY,
         FULL_CAPACITY,
-        // V_CELL,
+        V_CELL,
         OTG,
 
         COUNT
     };
 
-    VRAVoltage(PinName p_sda, PinName p_scl, PinName p_interrupt);
-
-    const UUID *gattServiceUUID;
-    GattService *gattService;
-    GattCharacteristic **gattCharacteristics;
-
-    void addCustomGattService();
+    VRAVoltage(const char *p_uuid, PinName p_sda, PinName p_scl, PinName p_interrupt);
 
     void initCharacteristics();
-
-    void getCharacteristics();
-    uint8_t getCharacteristcsCount();
-
-    BLEChar **characs;
 
     void init();
 
